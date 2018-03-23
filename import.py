@@ -28,9 +28,15 @@ def line_reader():
             csv_reader = csv.DictReader(csvfile, delimiter=';')
 
             for row in csv_reader:
-                t = datetime.strptime(
-                    f'{row["Date"]} {row["Time"]}', "%d/%m/%y %H:%M:%S"
-                )
+                try:
+                    t = datetime.strptime(
+                        f'{row["Date"]} {row["Time"]}', "%d/%m/%y %H:%M:%S"
+                    )
+                except ValueError:
+                    # On invalid time values skip to next row
+                    print('Ivalid time:', row['Date'], row['Time'])
+                    continue
+
                 timestamp = int(t.timestamp())
 
                 # Remove the datetime info before sending all data as vars
@@ -42,7 +48,9 @@ def line_reader():
                         row['Imp. Act. Energy S T1 kWh (3)']
                     )
                 except AttributeError:
+                    # On invalid value skip to next row
                     print('Invalid measurement:', row)
+                    continue
 
                 yield f'{location} value={value} {timestamp}'
 
