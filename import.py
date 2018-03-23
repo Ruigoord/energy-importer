@@ -6,7 +6,6 @@ import decimal
 import itertools
 
 import requests
-from slugify import slugify
 
 BUFFER_SIZE = 5000
 URL = 'http://localhost:8086/write?db=ruigoord'
@@ -26,9 +25,9 @@ def line_reader():
         location = filename.split('/')[0]
 
         with open(filename) as csvfile:
-            reader = csv.DictReader(csvfile, delimiter=';')
+            csv_reader = csv.DictReader(csvfile, delimiter=';')
 
-            for row in reader:
+            for row in csv_reader:
                 t = datetime.strptime(
                     f'{row["Date"]} {row["Time"]}', "%d/%m/%y %H:%M:%S"
                 )
@@ -38,35 +37,20 @@ def line_reader():
                 del row['Date']
                 del row['Time']
 
-                try:
-                    values = ','.join([
-                        '{key}={value}'.format(
-                            key=slugify(key),
-                            value=sanitize_number(value))
-                        for key, value in row.items()
-                    ])
-                except TypeError:
-                    # Sometime cols have None as header, ignore those
-                    pass
+                value = sanitize_number(row['Imp. Act. Energy S T1 kWh (3)'])
 
-                yield f'{location},{values} {timestamp}'
+                yield f'{location} value={value} {timestamp}'
 
 
 if __name__ == "__main__":
-    reader = line_reader()
+    line_reader = line_reader()
 
     try:
         with requests.Session() as session:
             while True:
-                # data = '\n'.join(itertools.islice(reader, BUFFER_SIZE))
-                # print(data)
-                response = session.post(URL, data='bauduinlaan,serial_number=14245I7G0074 value=1 1482765660')
-                print(response.status_code, response.text)
-                # print(response)
-                # response = session.post(URL, data=data)
-                # print(response)
-                # assert response.status_code == 204
-                exit()
+                data = '\n'.join(itertools.islice(line_reader, BUFFER_SIZE))
+                response = session.post(URL, data=data)
+                assert response.status_code == 204, response.text
     except StopIteration:
         pass
 
