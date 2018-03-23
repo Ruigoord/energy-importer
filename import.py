@@ -37,7 +37,12 @@ def line_reader():
                 del row['Date']
                 del row['Time']
 
-                value = sanitize_number(row['Imp. Act. Energy S T1 kWh (3)'])
+                try:
+                    value = sanitize_number(
+                        row['Imp. Act. Energy S T1 kWh (3)']
+                    )
+                except AttributeError:
+                    print('Invalid measurement:', row)
 
                 yield f'{location} value={value} {timestamp}'
 
