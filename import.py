@@ -66,7 +66,7 @@ def line_reader(paths):
                     # print('Invalid measurement:', row)
                     continue
 
-                yield f'{location} value={value} {timestamp}'
+                yield f'{location} value={value} {timestamp}000000000'
 
 
 def buffered_line_reader(lines, buffer_size):
