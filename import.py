@@ -6,6 +6,7 @@ import decimal
 import itertools
 
 import requests
+from more_itertools import peekable
 from progress.bar import IncrementalBar
 
 BUFFER_SIZE = 5000
@@ -75,22 +76,22 @@ def buffered_line_reader(lines, buffer_size):
 
 
 if __name__ == "__main__":
-    # We can't use iglob since we need the glob twice
-    all_csv_files = glob.glob('**/*.CSV', recursive=True)
-
-    total_size = get_total_lines(all_csv_files) / BUFFER_SIZE
+    total_lines = get_total_lines(glob.iglob('**/*.CSV', recursive=True))
+    total_size = total_lines / BUFFER_SIZE
 
     bar = IncrementalBar(
-        # max=total_size, suffix='%(percent)d%% [%(index)d/%(max)d]'
         max=total_size, suffix='%(percent)d%% [ETA: %(eta_td)s]'
     )
     bar.start()
 
+    csv_glob = peekable(glob.iglob('**/*.CSV', recursive=True))
     line_reader = buffered_line_reader(
-        line_reader(all_csv_files), buffer_size=BUFFER_SIZE
+        line_reader(csv_glob), buffer_size=BUFFER_SIZE
     )
 
     with requests.Session() as session:
+        # Iterate through the progress bar to auto update the bar
         for lines in bar.iter(line_reader):
+            bar.message = csv_glob.peek(bar.message)
             response = session.post(URL, data=lines)
             assert response.status_code == 204, response.text
