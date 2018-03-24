@@ -1,3 +1,5 @@
+import os
+import argparse
 import csv
 import glob
 from datetime import datetime
@@ -76,6 +78,15 @@ def buffered_line_reader(lines, buffer_size):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'path', help='Path to directory containing measurement data'
+    )
+    args = parser.parse_args()
+
+    # Use given path as working directory for script so glob works from there
+    os.chdir(args.path)
+
     total_lines = get_total_lines(glob.iglob('**/*.CSV', recursive=True))
     total_size = int(total_lines / BUFFER_SIZE)
 
