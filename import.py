@@ -68,16 +68,16 @@ def line_reader(paths):
 
 
 def buffered_line_reader(lines, buffer_size):
-    try:
-        while True:
-            yield '\n'.join(itertools.islice(lines, buffer_size))
-    except StopIteration:
-        pass
+    while True:
+        chunk = list(itertools.islice(lines, buffer_size))
+        if not chunk:
+            return
+        yield '\n'.join(chunk)
 
 
 if __name__ == "__main__":
     total_lines = get_total_lines(glob.iglob('**/*.CSV', recursive=True))
-    total_size = total_lines / BUFFER_SIZE
+    total_size = int(total_lines / BUFFER_SIZE)
 
     bar = IncrementalBar(
         max=total_size, suffix='%(percent)d%% [ETA: %(eta_td)s]'
