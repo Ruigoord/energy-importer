@@ -10,7 +10,7 @@ influxdb:
   volumes:
     # Data persistency
     # sudo mkdir -p /srv/docker/influxdb/data
-    - /Users/remco/Projects/ruigoord/energy/docker-influxdb-grafana/volumes/influxdb:/var/lib/influxdb
+    - ./volumes/influxdb:/var/lib/influxdb
 
 grafana:
   image: grafana/grafana:latest
