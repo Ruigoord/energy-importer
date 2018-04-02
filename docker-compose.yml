@@ -8,8 +8,6 @@ influxdb:
   env_file:
     - 'env.influxdb'
   volumes:
-    # Data persistency
-    # sudo mkdir -p /srv/docker/influxdb/data
     - ./volumes/influxdb:/var/lib/influxdb
 
 grafana:
@@ -21,3 +19,5 @@ grafana:
     - 'env.grafana'
   links:
     - influxdb
+  volumes:
+    - ./volumes/grafana:/var/lib/grafana
