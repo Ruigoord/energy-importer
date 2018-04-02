@@ -108,3 +108,6 @@ venv.bak/
 # Directories used by import and query commands
 import/
 export/
+
+# Used by docker compose
+volumes/
